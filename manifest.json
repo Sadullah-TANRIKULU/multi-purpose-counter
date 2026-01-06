@@ -1,0 +1,13 @@
+{
+  "short_name": "Collaborative Dhikr",
+  "name": "Dhikr Counter",
+  "description": "A simple, collaborative Dhikr counter for everyone.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F7F2",
+  "theme_color": "#C5D86D",
+  "icons": [
+    { "src": "./assets/WoodenRosary-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "./assets/WoodenRosary-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "leyletul-mevlid-salavat-counter",
+  "version": "1.0.0",
+  "description": "dhikr counter collaborative",
+  "keywords": [],
+  "license": "ISC",
+  "author": "Sadullah-TANRIKULU",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "postgres": "^3.4.7"
+  }
+}

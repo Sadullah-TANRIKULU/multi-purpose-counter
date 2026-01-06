@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" style="background: #f7f7f2">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dhikr Collaborative Counter</title>
+    <link rel="manifest" href="manifest.json" />
+    <link
+      rel="shortcut icon"
+      href="./assets/WoodenRosary.png"
+      type="image/x-icon"
+    />
+    <!-- Google Font: Noto Naskh Arabic -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="theme-color" content="#C5D86D" />
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f7f7f2;
+        color: #260c1a;
+      }
+      .container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 1.5em;
+      }
+      .total-counter {
+        font-size: 2em;
+        margin-top: 1.5em;
+        color: #f05d23b3;
+        text-align: center;
+      }
+      .arabic-text {
+        font-family: "Noto Naskh Arabic", serif;
+        font-size: 1.7em;
+        color: #260c1a;
+        text-align: center;
+        margin: 1.5em 0;
+        line-height: 1.4;
+        user-select: none;
+      }
+      #resetBtn {
+        margin: auto;
+        background: #c5d86db3;
+        color: #fff;
+        border: none;
+        border-radius: 1.5em;
+        font-size: 0.8em;
+        width: 50vw;
+        max-width: 350px;
+        padding: 1em;
+        box-shadow: 0 3px 12px #260c1a33;
+        display: block;
+        cursor: pointer;
+        user-select: none;
+      }
+      .your-label {
+        margin-top: 2.5em;
+        text-align: center;
+        font-size: 1em;
+        color: #260c1ab3;
+      }
+      .my-counter {
+        font-size: 3em;
+        margin: 0.4em 0 1em 0;
+        text-align: center;
+        color: #c5d86db3;
+      }
+      .counter-btn {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 4%;
+        margin: auto;
+        background: #f05d23b3;
+        color: #fff;
+        border: none;
+        border-radius: 2em;
+        font-size: 2em;
+        width: 85vw;
+        max-width: 350px;
+        height: 23vh;
+        padding: 1em;
+        box-shadow: 0 3px 12px #260c1a33;
+        display: block;
+        cursor: pointer;
+        user-select: none;
+      }
+      @media (min-width: 401px) {
+        .counter-btn {
+          position: static;
+        }
+        #resetBtn {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="total-counter">All Together: <span id="total">0</span></div>
+
+      <!-- Arabic text below total -->
+      <div class="arabic-text" dir="rtl" id="dhikrText">لا اله الا الله محمد رسول الله</div>
+      <button id="resetBtn">Reset My Count</button>
+      <div class="your-label">Your count:</div>
+      <div id="myCounter" class="my-counter">0</div>
+      <button class="counter-btn" id="dhikrBtn">+1 Dhikr</button>
+      <button id="installBtn" style="display:none; position: fixed; top: 1em; right: 1em; padding: 0.5em 1em; background: #c5d86db3; color: #fff; border: none; border-radius: 0.5em; cursor: pointer; font-size: 0.9em; z-index: 100;">⬇️ Install App</button>
+    </div>
+
+    <footer style="position: fixed; bottom: 0; left: 0; font-size: small; display: flex; gap: 1em;">
+      <div>
+        <a
+          href="https://iconscout.com/3d-icons/wooden-rosary"
+          class="text-underline font-size-sm"
+          target="_blank"
+          >Wooden Rosary</a
+        >
+        by
+        <a
+          href="https://iconscout.com/contributors/alper-guzeler"
+          class="text-underline font-size-sm"
+          >Alper Guzeler</a
+        >
+        on
+        <a href="https://iconscout.com" class="text-underline font-size-sm"
+          >IconScout</a
+        >
+      </div>
+      <a href="/admin" style="color: #999; font-size: 0.8em; align-self: center;">⚙️</a>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+      // Environment-aware API base URL
+      // Use relative URLs for same-origin requests
+      const API_BASE = 'http://localhost:3009';
+      
+      // Local counter
+      let counter = parseInt(localStorage.getItem("dhikrCounter")) || 0;
+      const myDisplay = document.getElementById("myCounter");
+      myDisplay.textContent = counter;
+
+      // Reset button clears local storage and updates UI
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        counter = 0;
+        localStorage.setItem("dhikrCounter", "0");
+        document.getElementById("myCounter").textContent = "0";
+      });
+
+      async function updateTotal() {
+        try {
+          let res = await fetch(`${API_BASE}/api/total`);
+          let data = await res.json();
+          console.log(data);
+          document.getElementById("total").textContent = data.total;
+        } catch (e) {
+          console.log("Offline: unable to fetch total");
+        }
+      }
+
+      async function loadDhikr() {
+        try {
+          let res = await fetch(`${API_BASE}/api/dhikr`);
+          let data = await res.json();
+          document.getElementById("dhikrText").textContent = data.dhikr;
+        } catch (e) {
+          console.log("Offline: using default dhikr text");
+        }
+      }
+
+      document
+        .getElementById("dhikrBtn")
+        .addEventListener("click", async () => {
+          counter++;
+          localStorage.setItem("dhikrCounter", String(counter));
+          myDisplay.textContent = counter;
+          
+          // Trigger confetti on milestone increments (every 50)
+          if (counter % 50 === 0 && typeof confetti !== 'undefined') {
+            confetti({ particleCount: 100, spread: 70 });
+          }
+          
+          // Try to increment on server
+          try {
+            let res = await fetch(`${API_BASE}/api/increment`, { method: "POST" });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            let data = await res.json();
+            document.getElementById("total").textContent = data.total;
+          } catch (e) {
+            console.log(`✗ Offline: local count only`);
+          }
+        });
+
+      updateTotal(); // on load
+      loadDhikr(); // load dhikr text on page load
+
+      // PWA Install Button
+      let deferredPrompt;
+      const installBtn = document.getElementById('installBtn');
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'block';
+        console.log('✓ App can be installed');
+      });
+
+      installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const result = await deferredPrompt.userChoice;
+          if (result.outcome === 'accepted') {
+            console.log('✓ App installed');
+            installBtn.style.display = 'none';
+          }
+          deferredPrompt = null;
+        }
+      });
+
+      window.addEventListener('appinstalled', () => {
+        console.log('✓ App successfully installed');
+        installBtn.style.display = 'none';
+      });
+    </script>
+  </body>
+</html>

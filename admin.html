@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin - Dhikr Counter</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f7f7f2;
+      color: #260c1a;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 3px 12px #260c1a33;
+    }
+    h1 {
+      text-align: center;
+      color: #f05d23b3;
+    }
+    .form-group {
+      margin-bottom: 1.5em;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.5em;
+      color: #260c1ab3;
+    }
+    input[type="password"],
+    textarea {
+      width: 100%;
+      padding: 0.75em;
+      font-size: 1em;
+      border: 2px solid #c5d86db3;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+    textarea {
+      min-height: 100px;
+      font-family: "Noto Naskh Arabic", serif;
+      resize: vertical;
+    }
+    input[type="password"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #f05d23b3;
+      box-shadow: 0 0 8px #f05d23b3;
+    }
+    button {
+      background: #f05d23b3;
+      color: white;
+      border: none;
+      padding: 0.75em 2em;
+      font-size: 1em;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.3s;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    .message {
+      margin-top: 1em;
+      padding: 1em;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .success {
+      background: #c5d86d;
+      color: #260c1a;
+    }
+    .error {
+      background: #f05d23b3;
+      color: white;
+    }
+    .current-dhikr {
+      background: #f7f7f2;
+      padding: 1em;
+      border-radius: 4px;
+      margin-bottom: 2em;
+      border-left: 4px solid #c5d86d;
+    }
+    .current-dhikr p {
+      margin: 0.5em 0;
+      font-size: 0.9em;
+    }
+    .current-dhikr .dhikr-text {
+      font-family: "Noto Naskh Arabic", serif;
+      font-size: 1.5em;
+      text-align: center;
+      color: #f05d23b3;
+      margin: 1em 0;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 1.5em;
+      color: #f05d23b3;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚙️ Admin Panel</h1>
+    
+    <div class="current-dhikr" dir="rtl" >
+      <p><strong>Current Dhikr Text:</strong></p>
+      <div class="dhikr-text" id="currentDhikr">Loading...</div>
+    </div>
+
+    <form id="adminForm">
+      <div class="form-group">
+        <label for="password">Admin Password:</label>
+        <input type="password" id="password" required placeholder="Enter admin password" />
+      </div>
+
+      <div class="form-group">
+        <label for="dhikrText">Dhikr Text (Arabic):</label>
+        <textarea id="dhikrText" required placeholder="Enter new dhikr text..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="resetCount" />
+          Reset counter to 0
+        </label>
+      </div>
+
+      <button type="submit">Update Dhikr</button>
+    </form>
+
+    <div id="message"></div>
+    <a href="/" class="back-link">← Back to Counter</a>
+  </div>
+
+  <script>
+    // Environment-aware API base URL
+    const API_BASE = window.location.hostname === 'localhost' 
+      ? 'http://localhost:3009'
+      : ''; // Use relative URLs on production
+
+    // Load current dhikr text
+    async function loadCurrentDhikr() {
+      try {
+        const res = await fetch(`${API_BASE}/api/dhikr`);
+        const data = await res.json();
+        document.getElementById('currentDhikr').textContent = data.dhikr;
+        document.getElementById('dhikrText').value = data.dhikr;
+      } catch (error) {
+        console.error('Error loading dhikr:', error);
+        document.getElementById('currentDhikr').textContent = 'Error loading current text';
+      }
+    }
+
+    // Handle form submission
+    document.getElementById('adminForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const password = document.getElementById('password').value;
+      const dhikrText = document.getElementById('dhikrText').value;
+      const resetCount = document.getElementById('resetCount').checked;
+      const messageEl = document.getElementById('message');
+
+      if (!dhikrText.trim()) {
+        messageEl.className = 'message error';
+        messageEl.textContent = 'Dhikr text cannot be empty';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/dhikr`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password, dhikrText, resetCount })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          messageEl.className = 'message success';
+          messageEl.textContent = '✓ ' + data.message;
+          document.getElementById('password').value = '';
+          // Reload page after 2 seconds to show updated dhikr
+          setTimeout(() => {
+            location.reload();
+          }, 2000);
+        } else {
+          messageEl.className = 'message error';
+          messageEl.textContent = '✗ ' + (data.error || 'Update failed');
+        }
+      } catch (error) {
+        messageEl.className = 'message error';
+        messageEl.textContent = '✗ Network error: ' + error.message;
+      }
+    });
+
+    // Load current dhikr on page load
+    loadCurrentDhikr();
+  </script>
+</body>
+</html>

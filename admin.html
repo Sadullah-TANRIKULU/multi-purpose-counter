@@ -152,9 +152,9 @@
 
   <script>
     // Environment-aware API base URL
-    const API_BASE = window.location.hostname === 'localhost' 
+    const API_BASE = window.location.hostname === 'localhost'
       ? 'http://localhost:3009'
-      : ''; // Use relative URLs on production
+      : 'https://multi-purpose-counter.onrender.com';
 
     // Load current dhikr text
     async function loadCurrentDhikr() {

@@ -106,15 +106,44 @@
       <div class="total-counter">All Together: <span id="total">0</span></div>
 
       <!-- Arabic text below total -->
-      <div class="arabic-text" dir="rtl" id="dhikrText">لا اله الا الله محمد رسول الله</div>
+      <div class="arabic-text" dir="rtl" id="dhikrText">
+        لا اله الا الله محمد رسول الله
+      </div>
       <button id="resetBtn">Reset My Count</button>
       <div class="your-label">Your count:</div>
       <div id="myCounter" class="my-counter">0</div>
       <button class="counter-btn" id="dhikrBtn">+1 Dhikr</button>
-      <button id="installBtn" style="display:none; position: fixed; top: 1em; right: 1em; padding: 0.5em 1em; background: #c5d86db3; color: #fff; border: none; border-radius: 0.5em; cursor: pointer; font-size: 0.9em; z-index: 100;">⬇️ Install App</button>
+      <button
+        id="installBtn"
+        style="
+          display: none;
+          position: fixed;
+          top: 1em;
+          right: 1em;
+          padding: 0.5em 1em;
+          background: #c5d86db3;
+          color: #fff;
+          border: none;
+          border-radius: 0.5em;
+          cursor: pointer;
+          font-size: 0.9em;
+          z-index: 100;
+        "
+      >
+        ⬇️ Install App
+      </button>
     </div>
 
-    <footer style="position: fixed; bottom: 0; left: 0; font-size: small; display: flex; gap: 1em;">
+    <footer
+      style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        font-size: small;
+        display: flex;
+        gap: 1em;
+      "
+    >
       <div>
         <a
           href="https://iconscout.com/3d-icons/wooden-rosary"
@@ -133,15 +162,18 @@
           >IconScout</a
         >
       </div>
-      <a href="/admin" style="color: #999; font-size: 0.8em; align-self: center;">⚙️</a>
+      <a href="/admin" style="color: #999; font-size: 0.8em; align-self: center"
+        >⚙️</a
+      >
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script>
       // Environment-aware API base URL
-      // Use relative URLs for same-origin requests
-      const API_BASE = 'http://localhost:3009';
-      
+      const API_BASE = window.location.hostname === 'localhost'
+        ? 'http://localhost:3009'
+        : 'https://multi-purpose-counter.onrender.com';
+
       // Local counter
       let counter = parseInt(localStorage.getItem("dhikrCounter")) || 0;
       const myDisplay = document.getElementById("myCounter");
@@ -181,15 +213,17 @@
           counter++;
           localStorage.setItem("dhikrCounter", String(counter));
           myDisplay.textContent = counter;
-          
+
           // Trigger confetti on milestone increments (every 50)
-          if (counter % 50 === 0 && typeof confetti !== 'undefined') {
+          if (counter % 50 === 0 && typeof confetti !== "undefined") {
             confetti({ particleCount: 100, spread: 70 });
           }
-          
+
           // Try to increment on server
           try {
-            let res = await fetch(`${API_BASE}/api/increment`, { method: "POST" });
+            let res = await fetch(`${API_BASE}/api/increment`, {
+              method: "POST",
+            });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             let data = await res.json();
             document.getElementById("total").textContent = data.total;
@@ -203,30 +237,30 @@
 
       // PWA Install Button
       let deferredPrompt;
-      const installBtn = document.getElementById('installBtn');
+      const installBtn = document.getElementById("installBtn");
 
-      window.addEventListener('beforeinstallprompt', (e) => {
+      window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        installBtn.style.display = 'block';
-        console.log('✓ App can be installed');
+        installBtn.style.display = "block";
+        console.log("✓ App can be installed");
       });
 
-      installBtn.addEventListener('click', async () => {
+      installBtn.addEventListener("click", async () => {
         if (deferredPrompt) {
           deferredPrompt.prompt();
           const result = await deferredPrompt.userChoice;
-          if (result.outcome === 'accepted') {
-            console.log('✓ App installed');
-            installBtn.style.display = 'none';
+          if (result.outcome === "accepted") {
+            console.log("✓ App installed");
+            installBtn.style.display = "none";
           }
           deferredPrompt = null;
         }
       });
 
-      window.addEventListener('appinstalled', () => {
-        console.log('✓ App successfully installed');
-        installBtn.style.display = 'none';
+      window.addEventListener("appinstalled", () => {
+        console.log("✓ App successfully installed");
+        installBtn.style.display = "none";
       });
     </script>
   </body>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" style="background: #f7f7f2">
   <head>
     <meta charset="UTF-8" />
@@ -41,8 +41,11 @@
         color: #260c1a;
         text-align: center;
         margin: 1.5em 0;
-        line-height: 1.4;
+        line-height: 2;
         user-select: none;
+        white-space: pre-line;
+        display: block;
+        unicode-bidi: isolate;
       }
       #resetBtn {
         margin: auto;
@@ -170,9 +173,10 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script>
       // Environment-aware API base URL
-      const API_BASE = window.location.hostname === 'localhost'
-        ? 'http://localhost:3009'
-        : 'https://multi-purpose-counter.onrender.com';
+      const API_BASE =
+        window.location.hostname === "localhost"
+          ? "http://localhost:3009"
+          : "https://multi-purpose-counter.onrender.com";
 
       // Local counter
       let counter = parseInt(localStorage.getItem("dhikrCounter")) || 0;
